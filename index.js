@@ -7,100 +7,149 @@ class Darkmode {
     }
     /*
       delay: maybe animation
-      
+
     */ 
     const defaultOptions = {
-      bottom: '32px',
-      right: '32px',
-      left: 'unset',
       time: '0.3s',
-      mixColor: '#fff',
-      backgroundColor: '#fff',
-      buttonColorDark: '#100f2c',
-      buttonColorLight: '#fff',
-      label: '',
-      saveInCookies: true,
-      autoMatchOsTheme: true
+      textColor: 'white',
+      buttonColorPrimary: '#047857', // bg color
+      buttonColorLight: '#fff', //not used, but could be used if darkMode is added
+      label: '←',
+      autoMatchOsTheme: true, //not used, but could be used if darkMode is added
+      position: 'bottom-left', // top-right | top-left | bottom-left | bottom-right
+      animation: 'fadeIn', // fadeIn | scaleUp | slideBottom | slideTop | slideleft | slideRight
+      display: 'onLoad', // onLoad | onScrollDown | onScrollUp
+      hideMode: 'none', // not used for now
+      scrollHeight: 300, //in px, not used now
+      radius: '50%', // Any css unit, 50% gives a rounded btn if same height/width
+      width: 'auto',
+      delay: '1000', // defines how much time to wait until the element shows up
+      backBehavior: 'javascript', // for now, javascript only
+      containerClass: null, // if not null, button is injected into a container, it uses any html selectors '.class' '#id' 
+      textAlign: 'center', // center | start | end 
+      shadow: false
     };
 
     options = Object.assign({}, defaultOptions, options);
 
+    const position = () => {
+      let values = {right: 'unset', left: 'unset', bottom: 'unset', top: 'unset'}
+      switch (options.position) {
+        case 'bottom-right':
+          values.right = '32px';
+          values.bottom =  '32px';
+          break;
+        case 'bottom-left':
+          values.left = '32px';
+          values.bottom =  '32px';
+          break;
+        case 'top-right':
+          values.top = '32px';
+          values.right =  '32px';
+          break; 
+        case 'top-left':
+          values.top = '32px';
+          values.left =  '32px';
+          break; 
+        default:
+          values.right = '32px';
+          values.bottom =  '32px';
+      }
+      return values
+    }
     const css = `
-      .darkmode-layer {
-        position: fixed;
-        pointer-events: none;
-        background: ${options.mixColor};
-        transition: all ${options.time} ease;
-        mix-blend-mode: difference;
-      }
-
-      .darkmode-layer--button {
-        width: 2.9rem;
-        height: 2.9rem;
-        border-radius: 50%;
-        right: ${options.right};
-        bottom: ${options.bottom};
-        left: ${options.left};
-      }
-
-      .darkmode-layer--simple {
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        transform: scale(1) !important;
-      }
-
-      .darkmode-layer--expanded {
-        transform: scale(100);
-        border-radius: 0;
-      }
-
-      .darkmode-layer--no-transition {
-        transition: none;
-      }
-
-      .darkmode-toggle {
-        background: ${options.buttonColorDark};
-        width: 3rem;
+      
+      /* BTN CLASSES */
+      .backButton-toggle {
+        background: ${options.buttonColorPrimary};
+        width: ${options.width};
         height: 3rem;
-        position: fixed;
-        border-radius: 50%;
+        padding: 1em;
+        position: ${options.containerClass == null ? 'fixed' : 'block' };
+        border-radius: ${options.radius};
         border:none;
-        right: ${options.right};
-        bottom: ${options.bottom};
-        left: ${options.left};
+        right: ${position().right};
+        bottom: ${position().bottom};
+        left: ${position().left};
+        top: ${position().top};
         cursor: pointer;
         transition: all 0.5s ease;
-        display: flex;
-        justify-content: center;
+        display: none;
+        justify-content: ${options.textAlign};
         align-items: center;
+        z-index: 999999;
+        color: ${options.textColor};
+        animation: ${options.animation + ' ' + '0.5s both'};
+        box-shadow: ${options.shadow ? '0px 3px 15px rgba(0,0,0,0.2);' : 'none'}
+        
       }
 
-      .darkmode-toggle--white {
+      .backButton-toggle--white {
         background: ${options.buttonColorLight};
       }
 
-      .darkmode-toggle--inactive {
+      .backButton-toggle--inactive {
         display: none;
       }
 
-      .darkmode-background {
-        background: ${options.backgroundColor};
-        position: fixed;
-        pointer-events: none;
-        z-index: -10;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
+      .backButton-toggle--visible {
+        display: flex
       }
 
-      img, .darkmode-ignore {
-        isolation: isolate;
-        display: inline-block;
+    @keyframes fadeIn {
+      0% {
+          opacity: 0;
       }
+      100% {
+          opacity: 1;
+       }
+  }
 
+  @keyframes scaleUp {
+    0% {
+      transform: scale(0.5);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes slideBottom {
+    0% {
+      transform: translateY(1000px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideTop {
+    0% {
+      transform: translateY(-1000px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideLeft {
+    0% {
+      transform: translateX(-1000px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideRight {
+    0% {
+      transform: translateX(1000px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+      /* CHECK MEDIA CLASSES */
       @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
         .darkmode-toggle {display: none !important}
       }
@@ -109,46 +158,32 @@ class Darkmode {
         .darkmode-toggle {display: none !important}
       }
     `;
-
-    const layer = document.createElement('div');
+    
+    // keep btn
     const button = document.createElement('button');
-    const background = document.createElement('div');
+    button.innerHTML = options.label; //adds txt
 
-    button.innerHTML = options.label;
-    button.classList.add('darkmode-toggle--inactive');
-    layer.classList.add('darkmode-layer');
-    background.classList.add('darkmode-background');
+    // check if we would store history here
+    //const darkmodeActivated = window.localStorage.getItem('history') === '0';
+      if(options.containerClass  == null ) {
+        document.body.insertBefore(button, document.body.firstChild);
+      } else {
+        let container = document.querySelector(options.containerClass);
+        container.appendChild(button)
+      }
 
-    const darkmodeActivated = window.localStorage.getItem('darkmode') === 'true';
-    const preferedThemeOs =
-      options.autoMatchOsTheme && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const darkmodeNeverActivatedByAction = window.localStorage.getItem('darkmode') === null;
-
-    if (
-      (darkmodeActivated === true && options.saveInCookies) ||
-      (darkmodeNeverActivatedByAction && preferedThemeOs)
-    ) {
-      layer.classList.add(
-        'darkmode-layer--expanded',
-        'darkmode-layer--simple',
-        'darkmode-layer--no-transition'
-      );
-      button.classList.add('darkmode-toggle--white');
-      document.body.classList.add('darkmode--activated');
-    }
-
-    document.body.insertBefore(button, document.body.firstChild);
-    document.body.insertBefore(layer, document.body.firstChild);
-    document.body.insertBefore(background, document.body.firstChild);
-
+    // with 'this' refers to the fn addStyle below (1)
     this.addStyle(css);
 
     this.button = button;
-    this.layer = layer;
-    this.saveInCookies = options.saveInCookies;
+    this.display = options.display;
+    this.hideMode = options.hideMode;
     this.time = options.time;
+    this.scrollHeight = options.scrollHeight;
+    this.delay = options.delay;
+    this.backBehavior = options.backBehavior;
   }
-
+ // (1) inserts css in page
   addStyle(css) {
     const linkElement = document.createElement('link');
 
@@ -158,71 +193,95 @@ class Darkmode {
     document.head.appendChild(linkElement);
   }
 
-  showWidget() {
-    if (!IS_BROWSER) {
-      return;
-    }
-    const button = this.button;
-    const layer = this.layer;
-    const time = parseFloat(this.time) * 1000;
 
-    button.classList.add('darkmode-toggle');
-    button.classList.remove('darkmode-toggle--inactive');
-    button.setAttribute('aria-label', 'Activate dark mode');
-    button.setAttribute('aria-checked', 'false');
-    button.setAttribute('role', 'checkbox');
-    layer.classList.add('darkmode-layer--button');
+  init() {
+    if (!IS_BROWSER) {
+          return;
+    }
+    const scrollHeight = this.scrollHeight   ;
+    let backBehavior = this.backBehavior;
+    // keep, 'this' refers to the bubbotn in the constructor
+    const button = this.button;
+    let scrollTop = 0;
+    // const hideMode = this.hideMode;
+    const display = this.display
+    
+    const delay = this.delay
+    const  displayMode = () => {
+      let lastScrollTop = 0;
+      switch (display) {
+        case 'onLoad':
+            this.button.classList.add('backButton-toggle--visible');          
+          break;
+        case 'scrollDown':
+          
+        window.addEventListener('scroll', function() {
+          let scrollTop = window.scrollY || document.documentElement.scrollTop;
+  
+          if (scrollTop < lastScrollTop) {
+            // Scrolling down, hide the element
+            button.style.display = 'none';
+          } else {
+            // Scrolling up, show the element
+            button.style.display = 'flex';
+          }
+  
+          lastScrollTop = scrollTop;
+        });
+          break;
+        case 'scrollUp':
+          
+          window.addEventListener('scroll', function() {
+            let scrollTop = window.scrollY || document.documentElement.scrollTop;
+    
+            if (scrollTop > lastScrollTop) {
+              // Scrolling down, hide the element
+              button.style.display = 'none';
+            } else {
+              // Scrolling up, show the element
+              button.style.display = 'flex';
+            }
+    
+            lastScrollTop = scrollTop;
+          });
+          break; 
+        default:
+          this.button.classList.add('backButton-toggle--visible')
+          break;
+      }
+     
+    }
+    // Triggers displayMode after X MilliSeconds
+    setTimeout(() => {
+      displayMode()
+    }, delay)
+
+    button.classList.add('backButton-toggle');
+    button.setAttribute('aria-label', 'Go back');
 
     button.addEventListener('click', () => {
-      const isDarkmode = this.isActivated();
 
-      if (!isDarkmode) {
-        layer.classList.add('darkmode-layer--expanded');
-        button.setAttribute('disabled', true);
-        setTimeout(() => {
-          layer.classList.add('darkmode-layer--no-transition');
-          layer.classList.add('darkmode-layer--simple');
-          button.removeAttribute('disabled');
-        }, time);
-      } else {
-        layer.classList.remove('darkmode-layer--simple');
-        button.setAttribute('disabled', true);
-        setTimeout(() => {
-          layer.classList.remove('darkmode-layer--no-transition');
-          layer.classList.remove('darkmode-layer--expanded');
-          button.removeAttribute('disabled');
-        }, 1);
+      // HERE GOES THE BACK FUNCTIONS
+      if(backBehavior === 'javascript') {
+        history.back();
+        console.log(history.length)
       }
-
-      button.classList.toggle('darkmode-toggle--white');
-      document.body.classList.toggle('darkmode--activated');
-      window.localStorage.setItem('darkmode', !isDarkmode);
     });
+
+    //window.localStorage.setItem('history', history.lenght);
   }
 
-  toggle() {
+  // PROGRAMATIC GO BACK
+  trigger() {
     if (!IS_BROWSER) {
       return;
     }
-    const layer = this.layer;
-    const isDarkmode = this.isActivated();
     const button = this.button;
-
-    layer.classList.toggle('darkmode-layer--simple');
-    document.body.classList.toggle('darkmode--activated');
-    window.localStorage.setItem('darkmode', !isDarkmode);
-    button.setAttribute('aria-label', 'De-activate dark mode');
-    button.setAttribute('aria-checked', 'true');
+    history.back();
+    //window.localStorage.setItem('darkmode', history.length);
   }
-
-  isActivated() {
-    if (!IS_BROWSER) {
-      return null;
-    }
-    return document.body.classList.contains('darkmode--activated');
-  }
+  
 }
-
 
 /* eslint-disable */
 if (IS_BROWSER) {
