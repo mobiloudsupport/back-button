@@ -1,28 +1,24 @@
 const IS_BROWSER = typeof window !== 'undefined';
 
-class Darkmode {
+class BackButton {
   constructor(options) {
     if (!IS_BROWSER) {
       return;
     }
-    /*
-      delay: maybe animation
-
-    */ 
     const defaultOptions = {
       time: '0.3s',
       textColor: 'white',
-      buttonColorPrimary: '#047857', // bg color
+      buttonColorPrimary: '#000', // bg color
       buttonColorLight: '#fff', //not used, but could be used if darkMode is added
       label: '←',
       autoMatchOsTheme: true, //not used, but could be used if darkMode is added
-      position: 'bottom-left', // top-right | top-left | bottom-left | bottom-right
-      animation: 'fadeIn', // fadeIn | scaleUp | slideBottom | slideTop | slideleft | slideRight
-      display: 'onLoad', // onLoad | onScrollDown | onScrollUp
+      position: 'top-left', // top-right | top-left | bottom-left | bottom-right
+      animation: 'slideTop', // fadeIn | scaleUp | slideBottom | slideTop | slideleft | slideRight
+      display: 'onScrollDown', // onLoad | onScrollDown | onScrollUp
       hideMode: 'none', // not used for now
       scrollHeight: 300, //in px, not used now
-      radius: '50%', // Any css unit, 50% gives a rounded btn if same height/width
-      width: 'auto',
+      radius: '5px', // Any css unit, 50% gives a rounded btn if same height/width
+      width: '200px',
       delay: '1000', // defines how much time to wait until the element shows up
       backBehavior: 'javascript', // for now, javascript only
       containerClass: null, // if not null, button is injected into a container, it uses any html selectors '.class' '#id' 
@@ -31,32 +27,31 @@ class Darkmode {
     };
 
     options = Object.assign({}, defaultOptions, options);
+    let positionValues = {right: 'unset', left: 'unset', bottom: 'unset', top: 'unset'}
 
-    const position = () => {
-      let values = {right: 'unset', left: 'unset', bottom: 'unset', top: 'unset'}
+   
       switch (options.position) {
         case 'bottom-right':
-          values.right = '32px';
-          values.bottom =  '32px';
+          positionValues.right = '32px';
+          positionValues.bottom =  '32px';
           break;
         case 'bottom-left':
-          values.left = '32px';
-          values.bottom =  '32px';
+          positionValues.left = '32px';
+          positionValues.bottom =  '32px';
           break;
         case 'top-right':
-          values.top = '32px';
-          values.right =  '32px';
+          positionValues.top = '32px';
+          positionValues.right =  '32px';
           break; 
         case 'top-left':
-          values.top = '32px';
-          values.left =  '32px';
+          positionValues.top = '32px';
+          positionValues.left =  '32px';
           break; 
         default:
-          values.right = '32px';
-          values.bottom =  '32px';
+          positionValues.right = '32px';
+          positionValues.bottom =  '32px';
       }
-      return values
-    }
+
     const css = `
       
       /* BTN CLASSES */
@@ -68,10 +63,10 @@ class Darkmode {
         position: ${options.containerClass == null ? 'fixed' : 'block' };
         border-radius: ${options.radius};
         border:none;
-        right: ${position().right};
-        bottom: ${position().bottom};
-        left: ${position().left};
-        top: ${position().top};
+        right: ${positionValues.right};
+        bottom: ${positionValues.bottom};
+        left: ${positionValues.left};
+        top: ${positionValues.top};
         cursor: pointer;
         transition: all 0.5s ease;
         display: none;
@@ -213,7 +208,7 @@ class Darkmode {
         case 'onLoad':
             this.button.classList.add('backButton-toggle--visible');          
           break;
-        case 'scrollDown':
+        case 'onScrollDown':
           
         window.addEventListener('scroll', function() {
           let scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -229,7 +224,7 @@ class Darkmode {
           lastScrollTop = scrollTop;
         });
           break;
-        case 'scrollUp':
+        case 'onScrollUp':
           
           window.addEventListener('scroll', function() {
             let scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -286,7 +281,7 @@ class Darkmode {
 /* eslint-disable */
 if (IS_BROWSER) {
   (function (window) {
-    window.Darkmode = Darkmode;
+    window.BackButton = BackButton;
   })(window);
 }
 /* eslint-enable */
