@@ -276,10 +276,14 @@ class BackButton {
     button.addEventListener('click', () => {
 
       // HERE GOES THE BACK FUNCTIONS
-      if(backBehavior === 'javascript' && window.history.length > 1) {
-        history.back();
-        console.log(history.length)
-      }
+      if(backBehavior === 'javascript') {  
+        if(window.history.length > 1) {
+          history.back()
+        } // if user for some reason enters site not in homepage, on click go to homepage
+        if(window.history.length === 1) {
+          window.location.replace(window.location.origin)
+        }
+    }
     });
 
     //window.localStorage.setItem('history', history.lenght);
